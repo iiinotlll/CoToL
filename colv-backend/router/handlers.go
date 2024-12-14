@@ -3,6 +3,7 @@ package router
 import (
 	"colv/sqldb"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,15 +13,16 @@ type MysqlHandler struct {
 
 func GinStart() {
 	r := gin.Default()
+	r.Use(cors.Default())
 	dbh := &MysqlHandler{sqldb.MysqlDBInit()}
 
-	r.GET("/Login", dbh.HandleUserLogin)
+	r.POST("/Login", dbh.HandleUserLogin)
 	r.POST("/SignUp", dbh.HandleUserSignUp)
 
 	r.POST("/UserPage/PostArticle", dbh.HandleArticlePost)
 	r.GET("/UserPage/ReadArticle", dbh.HandleArticleRead)
 
-	r.Run(":8080")
+	r.Run(":8088")
 }
 
 func (dbh *MysqlHandler) HandleUserLogin(c *gin.Context) {

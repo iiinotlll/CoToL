@@ -1,9 +1,10 @@
 package main
 
-import "colv/router"
+import (
+	"colv/router"
+)
 
 func main() {
 	println("hello colv~")
-
 	router.GinStart()
 }
