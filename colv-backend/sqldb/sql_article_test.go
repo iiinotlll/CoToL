@@ -20,5 +20,5 @@ func TestArticlePost(t *testing.T) {
 
 func TestArticleGet(t *testing.T) {
 	db := MysqlDBInit()
-	fmt.Println(db.GetArticle(2))
+	fmt.Println(db.GetArticle(2, 10))
 }

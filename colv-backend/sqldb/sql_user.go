@@ -10,11 +10,15 @@ import (
 const userTableName = "users"
 
 type User struct {
-	UID        uint      `gorm:"primaryKey;column:user_UID"`
+	UID        uint      `gorm:"primaryKey;column:user_uid"`
 	Mail       string    `gorm:"column:user_mail"`
 	UserName   string    `gorm:"column:user_name"`
 	PwdHash    string    `gorm:"column:passwd_hash"`
 	CreateTime time.Time `gorm:"column:create_time"`
+}
+
+type ArticlesOfUser struct {
+	Articles []Article
 }
 
 func (db *MysqlDB) UserSignUp(inputName string, inputMail string, inputPwd string) error {
