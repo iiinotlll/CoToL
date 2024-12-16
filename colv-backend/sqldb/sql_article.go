@@ -30,11 +30,14 @@ func (db *MysqlDB) PostArticle(uid uint, title, article_data string) error {
 	return createResult.Error
 }
 
-func (db *MysqlDB) GetArticle(article_id uint) (*Article, error) {
+func (db *MysqlDB) GetArticle(uid, article_id uint) (*Article, error) {
 	var articleFromDB Article
 	result := db.DB.Table(articleTableName).Where("article_id = ?", article_id).First(&articleFromDB)
 	if result.Error != nil {
 		return nil, result.Error
+	}
+	if articleFromDB.BelongsToUID != uid {
+		return nil, fmt.Errorf("wrong belongs to BelongsToUID = %d", articleFromDB.BelongsToUID)
 	}
 	return &articleFromDB, nil
 }
@@ -42,4 +45,12 @@ func (db *MysqlDB) GetArticle(article_id uint) (*Article, error) {
 func (db *MysqlDB) DelArticle(uid, article_id uint) error {
 	result := db.DB.Table(articleTableName).Where("article_id = ? AND belongsto_uid = ?", article_id, uid).Delete(nil)
 	return result.Error
+}
+
+func (db *MysqlDB) FindAllArticlesAbstracts(uid uint) (*ArticlesOfUser, error) {
+	var articles []Article
+	if err := db.DB.Where("belongsto_uid = ?", uid).Find(&articles).Error; err != nil {
+		return nil, err
+	}
+	return &ArticlesOfUser{articles}, nil
 }

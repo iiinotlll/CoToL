@@ -2,6 +2,7 @@ package router
 
 import (
 	"colv/sqldb"
+	"net/http"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -19,8 +20,9 @@ func GinStart() {
 	r.POST("/Login", dbh.HandleUserLogin)
 	r.POST("/SignUp", dbh.HandleUserSignUp)
 
-	r.POST("/UserPage/PostArticle", dbh.HandleArticlePost)
-	r.GET("/UserPage/ReadArticle", dbh.HandleArticleRead)
+	r.GET("/UserPage/GetArticleAbstract", JWTAuthMiddleware(), dbh.HandleArticleAbstractRead)
+	r.POST("/UserPage/PostArticle", JWTAuthMiddleware(), dbh.HandleArticlePost)
+	r.GET("/UserPage/ReadArticle", JWTAuthMiddleware(), dbh.HandleArticleRead)
 
 	r.Run(":8088")
 }
@@ -38,10 +40,19 @@ func (dbh *MysqlHandler) HandleUserLogin(c *gin.Context) {
 	}
 
 	// try to log in
-	if _, err := dbh.DB.UserLogin(usrLogin.Mail, usrLogin.PassWord); err != nil {
+	if user, err := dbh.DB.UserLogin(usrLogin.Mail, usrLogin.PassWord); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 	} else {
-		c.JSON(200, gin.H{"message": "login successful"})
+		token, err := GenerateToken(user.UID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate token"})
+			return
+		}
+		// 返回 Token
+		c.JSON(http.StatusOK, gin.H{
+			"UID":   user.UID,
+			"token": token,
+		})
 	}
 }
 
@@ -68,9 +79,14 @@ func (dbh *MysqlHandler) HandleUserSignUp(c *gin.Context) {
 
 func (dbh *MysqlHandler) HandleArticlePost(c *gin.Context) {
 	var articlePost struct {
-		UID     uint   `json:"UID" binding:"required"`
 		Title   string `json:"Title" binding:"required"`
 		Content string `json:"Content" binding:"required"`
+	}
+
+	userID, exists := c.Get("UID")
+	if !exists {
+		c.JSON(400, gin.H{"error": "UID not found"})
+		return
 	}
 
 	// bind json
@@ -80,7 +96,7 @@ func (dbh *MysqlHandler) HandleArticlePost(c *gin.Context) {
 	}
 
 	// try to sign up
-	if err := dbh.DB.PostArticle(articlePost.UID, articlePost.Title, articlePost.Content); err != nil {
+	if err := dbh.DB.PostArticle(uint(userID.(float64)), articlePost.Title, articlePost.Content); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 	} else {
 		c.JSON(200, gin.H{"message": "article post successful"})
@@ -92,6 +108,12 @@ func (dbh *MysqlHandler) HandleArticleRead(c *gin.Context) {
 		ArticleID uint `json:"ArticleID" binding:"required"`
 	}
 
+	userID, exists := c.Get("UID")
+	if !exists {
+		c.JSON(400, gin.H{"error": "UID not found"})
+		return
+	}
+
 	// bind json
 	if err := c.ShouldBind(&articleRead); err != nil {
 		c.JSON(400, gin.H{"error": "invalid request"})
@@ -99,7 +121,22 @@ func (dbh *MysqlHandler) HandleArticleRead(c *gin.Context) {
 	}
 
 	// try to sign up
-	if article_data, err := dbh.DB.GetArticle(articleRead.ArticleID); err != nil {
+	if article_data, err := dbh.DB.GetArticle(uint(userID.(float64)), articleRead.ArticleID); err != nil {
+		c.JSON(500, gin.H{"error": err.Error()})
+	} else {
+		c.JSON(200, gin.H{"message": article_data})
+	}
+}
+
+func (dbh *MysqlHandler) HandleArticleAbstractRead(c *gin.Context) {
+	userID, exists := c.Get("UID")
+	if !exists {
+		c.JSON(400, gin.H{"error": "UID not found"})
+		return
+	}
+
+	// try to sign up
+	if article_data, err := dbh.DB.FindAllArticlesAbstracts(uint(userID.(float64))); err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 	} else {
 		c.JSON(200, gin.H{"message": article_data})
