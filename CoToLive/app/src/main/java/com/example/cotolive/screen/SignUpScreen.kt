@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -35,8 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cotolive.ui.theme.CoToLiveTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,12 +47,10 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier) {
     var pwdReCheck by remember { mutableStateOf("") }
     var showPopUp by remember { mutableStateOf(false) }
     var checkResult by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
 
-    val signUpViewModel: SignUpViewModel = viewModel()  // 这里使用 viewModel() 获取 ViewModel 实例
-    val signUpUiState = signUpViewModel.signUpUiState
-
-    // 获取 CoroutineScope
-    val coroutineScope = rememberCoroutineScope()
+    val signUpViewModelInLayout: SignUpViewModel = viewModel()  // 这里使用 viewModel() 获取 ViewModel 实例
+    val signUpState = signUpViewModelInLayout.signUpUiState
 
     Column(
         modifier = Modifier
@@ -79,6 +76,7 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier) {
                 .height(60.dp),
             value = userMail,
             onValueChange = { userMail = it },
+            enabled = !isLoading,
             singleLine = true,
             label = {
                 Text(
@@ -107,6 +105,7 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier) {
                 .height(60.dp),
             value = userName,
             onValueChange = { userName = it },
+            enabled = !isLoading,
             singleLine = true,
             label = {
                 Text(
@@ -132,6 +131,7 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier) {
             value = userPwd,
             singleLine = true,
             onValueChange = { userPwd = it },
+            enabled = !isLoading,
             label = {
                 Text(
                     text = "密码",
@@ -156,6 +156,7 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier) {
             value = pwdReCheck,
             singleLine = true,
             onValueChange = { pwdReCheck = it },
+            enabled = !isLoading,
             label = {
                 Text(
                     text = "确认密码",
@@ -182,28 +183,18 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .padding(top = 40.dp, start = 5.dp, end = 5.dp),
             onClick = {
-                checkResult = checkSignUpInputText(userMail, userName, userPwd, pwdReCheck)
+                isLoading = true
+                checkResult = checkSignUpInputContent(userMail, userName, userPwd, pwdReCheck)
                 if (checkResult != "") {
                     // 前端输入不合法，显示错误信息
                     showPopUp = true
+                    isLoading = false
                 } else {
                     // 调用后端进行注册
-                    signUpViewModel.postUsrSignUp(userName, userMail, userPwd)
-                    when (val state = signUpViewModel.signUpUiState) {
-                        is SignUpUiState.Error -> {
-                            // 后端错误，显示错误信息
-                            checkResult = "注册失败，请稍后再试"
-                            showPopUp = true
-                        }
-                        is SignUpUiState.Success -> {
-                            // 注册成功，显示成功信息
-                            checkResult = state.message
-                            showPopUp = true
-                        }
-                        else -> { /* Loading 状态无需处理 */ }
-                    }
+                    signUpViewModelInLayout.postUsrSignUp(userName, userMail, userPwd)
                 }
             },
+            enabled = !isLoading,
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.DarkGray,
                 contentColor = Color.White
@@ -217,7 +208,34 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier) {
             )
         }
 
-        PasswordErrorPopup(modifier = Modifier, showPopUp, checkResult, { showPopUp = false })
+        AlertPopup(modifier = Modifier, showPopUp, checkResult, { showPopUp = false })
+
+        if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.padding(top = 30.dp).align(Alignment.CenterHorizontally))
+        }
+
+        // 当 signUpUiState 改变时重新执行
+        LaunchedEffect(signUpState) {
+            when (signUpState) {
+                is SignUpUiState.Error -> {
+                    // 后端错误，显示错误信息
+                    Log.e("SignUp", "注册失败")
+                    checkResult = signUpState.message
+                    showPopUp = true
+                }
+                is SignUpUiState.Success -> {
+                    // 注册成功，显示成功信息
+                    Log.d("SignUp", "注册成功")
+                    checkResult = signUpState.message
+                    showPopUp = true
+                }
+                else -> { /* Loading 状态无需处理 */ }
+            }
+        }
+
+        LaunchedEffect(signUpViewModelInLayout.signUpCallCnt) {
+            isLoading = false
+        }
     }
 }
 
@@ -226,7 +244,8 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier) {
 
 
 @Composable
-fun PasswordErrorPopup(modifier: Modifier = Modifier, showPopup: Boolean, checkResult: String, onDismiss: () -> Unit) {
+fun AlertPopup(modifier: Modifier = Modifier, showPopup: Boolean, checkResult: String, onDismiss: () -> Unit) {
+    if (checkResult == "") return
     if (showPopup) {
         // 启动协程在3秒后关闭弹窗
         LaunchedEffect(Unit) {
@@ -253,7 +272,7 @@ fun PasswordErrorPopup(modifier: Modifier = Modifier, showPopup: Boolean, checkR
     }
 }
 
-fun checkSignUpInputText (userMail: String, userName: String, userPwd: String, pwdRecheck: String): String {
+fun checkSignUpInputContent (userMail: String, userName: String, userPwd: String, pwdRecheck: String): String {
     if (userMail == "")
         return "邮箱不能为空！"
     if (userName == "")

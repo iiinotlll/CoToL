@@ -1,6 +1,7 @@
 package com.example.cotolive.screen
 import android.util.Log
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -19,6 +20,7 @@ sealed interface SignUpUiState {
 
 class SignUpViewModel : ViewModel() {
     var signUpUiState: SignUpUiState by mutableStateOf(SignUpUiState.Loading)
+    var signUpCallCnt: Int by mutableIntStateOf(0)
         private set
 
 
@@ -26,25 +28,21 @@ class SignUpViewModel : ViewModel() {
         viewModelScope.launch {
             val signUpReqMsg = SignUpRequestMessage(name, mail, password)
             signUpUiState = SignUpUiState.Loading
-            signUpUiState = try {
+            try {
                 val signUpResponse = CoToLiveApi.retrofitService.usrSignUp(signUpReqMsg)
-                SignUpUiState.Success(
+                signUpUiState = SignUpUiState.Success(
                     "Success: 注册成功, ${signUpResponse.message}"
                 )
             } catch (e: IOException) {
                 Log.e("SignUpViewModel", "Network error", e)
-                SignUpUiState.Error("网络错误，请稍后再试")
+                signUpUiState = SignUpUiState.Error("网络错误，请稍后再试")
             } catch (e: HttpException) {
                 Log.e("SignUpViewModel", "HTTP error", e)
                 // 这里可以获取到 HTTP 错误的详细信息
                 val errorMessage = e.response()?.errorBody()?.string() ?: "服务器错误，请稍后再试"
-                SignUpUiState.Error(errorMessage)
+                signUpUiState = SignUpUiState.Error(errorMessage)
             }
+            signUpCallCnt ++
         }
     }
 }
-
-
-
-
-
