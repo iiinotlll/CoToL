@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -21,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -32,13 +35,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cotolive.ui.theme.CoToLiveTheme
+import kotlin.math.log
 
 @Composable
 fun LogInScreenLayout(modifier: Modifier = Modifier) {
     var userMail by remember { mutableStateOf("") }
     var userPwd by remember { mutableStateOf("") }
+
     var showPopUp by remember { mutableStateOf(false) }
     var checkResult by remember { mutableStateOf("") }
+    var popUpOk by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(false) }
 
     val logInViewModelInLayout : LogInViewModel = viewModel()
     val logInUiState = logInViewModelInLayout.logInUiState
@@ -66,6 +73,7 @@ fun LogInScreenLayout(modifier: Modifier = Modifier) {
                 .padding(top = 50.dp)
                 .height(70.dp),
             value = userMail,
+            enabled = !isLoading,
             onValueChange = { userMail = it },
             singleLine = true,
             label = {
@@ -96,6 +104,7 @@ fun LogInScreenLayout(modifier: Modifier = Modifier) {
                 .height(60.dp)
                 .background(color = Color.Transparent),
             value = userPwd,
+            enabled = !isLoading,
             singleLine = true,
             onValueChange = { userPwd = it },
             label = {
@@ -118,11 +127,15 @@ fun LogInScreenLayout(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 30.dp, start = 5.dp, end = 5.dp),
+            enabled = !isLoading,
             onClick = {
+                popUpOk = false
+                isLoading = true
                 checkResult = checkLogInInputContent(userMail, userPwd)
                 if (checkResult != "") {
                     // 前端输入不合法，显示错误信息
                     showPopUp = true
+                    isLoading = false
                 } else {
                     logInViewModelInLayout.postUsrLogIn(mail = userMail, password = userPwd)
                 }
@@ -162,7 +175,11 @@ fun LogInScreenLayout(modifier: Modifier = Modifier) {
             )
         }
 
-        AlertPopup(showPopup = showPopUp, checkResult = checkResult, onDismiss = { showPopUp = false})
+        AlertPopup(showPopup = showPopUp, checkResult = checkResult, onDismiss = { showPopUp = false}, isOk = popUpOk)
+
+        if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.padding(top = 30.dp).align(Alignment.CenterHorizontally))
+        }
 
         LaunchedEffect(logInUiState) {
             when (logInUiState) {
@@ -173,17 +190,22 @@ fun LogInScreenLayout(modifier: Modifier = Modifier) {
                     showPopUp = true
                 }
                 is LogInUiState.Success -> {
-                    // 注册成功，显示成功信息
+                    // 登录成功，显示成功信息
                     Log.d("LogIn", "登录成功")
                     checkResult = logInUiState.message
                     showPopUp = true
+                    popUpOk = true
                 }
                 else -> { /* Loading 状态无需处理 */ }
             }
         }
+
+        LaunchedEffect(logInViewModelInLayout.logInCallCnt) {
+            isLoading = false
+        }
+
     }
 }
-
 
 
 private fun checkLogInInputContent(mail: String, pwd: String): String{

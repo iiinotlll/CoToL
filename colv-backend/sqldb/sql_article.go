@@ -47,10 +47,14 @@ func (db *MysqlDB) DelArticle(uid, article_id uint) error {
 	return result.Error
 }
 
-func (db *MysqlDB) FindAllArticlesAbstracts(uid uint) (*ArticlesOfUser, error) {
+func (db *MysqlDB) FindAllArticlesAbstracts(uid uint) ([]Article, error) {
 	var articles []Article
-	if err := db.DB.Where("belongsto_uid = ?", uid).Find(&articles).Error; err != nil {
+	// 使用 SQL 查询截取内容
+	if err := db.DB.
+		Select("article_id, belongsto_uid, title, LEFT(data_content, 20) AS data_content").
+		Where("belongsto_uid = ?", uid).
+		Find(&articles).Error; err != nil {
 		return nil, err
 	}
-	return &ArticlesOfUser{articles}, nil
+	return articles, nil
 }

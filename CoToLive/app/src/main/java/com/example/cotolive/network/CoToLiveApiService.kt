@@ -22,7 +22,7 @@ class AuthenticationInterceptor : Interceptor {
         // 如果 token 存在，则在请求头中附加 Authorization
         val newRequest = if (token != null) {
             chain.request().newBuilder()
-                .addHeader("Authorization", "Bearer $token")  // 添加 Authorization 头
+                .addHeader("Authorization", "$token")  // 添加 Authorization 头
                 .build()
         } else {
             chain.request()  // 如果没有 token，直接发出请求
@@ -52,10 +52,8 @@ interface CoToLiveApiService {
     @POST("LogIn")
     suspend fun usrLogIn(@Body logInReq: LogInPostMessage): LogInResponseMessage
 
-    @GET("AllAriticleAbstract")
-    suspend fun usrGetAbstracts(
-        @Query("uid") uid: Int,
-    ): ArticleAbstractResponseMessage
+    @GET("/UserPage/GetArticleAbstract")
+    suspend fun articleAbstractsFetch(): ArticleAbstractResponseMessage
 }
 
 // 单例对象，用于提供 Retrofit 服务

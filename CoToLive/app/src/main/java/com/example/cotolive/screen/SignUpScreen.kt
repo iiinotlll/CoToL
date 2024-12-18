@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -38,7 +37,7 @@ import com.example.cotolive.ui.theme.CoToLiveTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun SignUpScreenLayout(modifier: Modifier = Modifier) {
     var userMail by remember { mutableStateOf("") }
@@ -47,6 +46,7 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier) {
     var pwdReCheck by remember { mutableStateOf("") }
     var showPopUp by remember { mutableStateOf(false) }
     var checkResult by remember { mutableStateOf("") }
+    var popUpOk by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
 
     val signUpViewModelInLayout: SignUpViewModel = viewModel()  // 这里使用 viewModel() 获取 ViewModel 实例
@@ -183,6 +183,7 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .padding(top = 40.dp, start = 5.dp, end = 5.dp),
             onClick = {
+                popUpOk = false
                 isLoading = true
                 checkResult = checkSignUpInputContent(userMail, userName, userPwd, pwdReCheck)
                 if (checkResult != "") {
@@ -208,7 +209,7 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier) {
             )
         }
 
-        AlertPopup(modifier = Modifier, showPopUp, checkResult, { showPopUp = false })
+        AlertPopup(modifier = Modifier, showPopUp, checkResult, { showPopUp = false }, popUpOk)
 
         if (isLoading) {
             CircularProgressIndicator(modifier = Modifier.padding(top = 30.dp).align(Alignment.CenterHorizontally))
@@ -226,8 +227,9 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier) {
                 is SignUpUiState.Success -> {
                     // 注册成功，显示成功信息
                     Log.d("SignUp", "注册成功")
-                    checkResult = signUpState.message
+                    checkResult = "注册成功"
                     showPopUp = true
+                    popUpOk = true
                 }
                 else -> { /* Loading 状态无需处理 */ }
             }
@@ -244,7 +246,7 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier) {
 
 
 @Composable
-fun AlertPopup(modifier: Modifier = Modifier, showPopup: Boolean, checkResult: String, onDismiss: () -> Unit) {
+fun AlertPopup(modifier: Modifier = Modifier, showPopup: Boolean, checkResult: String, onDismiss: () -> Unit, isOk: Boolean) {
     if (checkResult == "") return
     if (showPopup) {
         // 启动协程在3秒后关闭弹窗
@@ -259,14 +261,14 @@ fun AlertPopup(modifier: Modifier = Modifier, showPopup: Boolean, checkResult: S
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp)
-                .border(1.dp, Color.DarkGray, RoundedCornerShape(5.dp))
-                .background(Color(0x30D3545F)),
+                .border(1.dp, Color.Transparent, RoundedCornerShape(10.dp))
+                .background(if (isOk)  Color(0xA0D5E7B5) else Color(0xF0FFCCE1)),
         ) {
             Text(
                 text = checkResult,
                 modifier= Modifier.padding(4.dp),
                 color = Color.Black,
-                fontSize = 22.sp
+                fontSize = 16.sp
             )
         }
     }

@@ -17,7 +17,7 @@ func GinStart() {
 	r.Use(cors.Default())
 	dbh := &MysqlHandler{sqldb.MysqlDBInit()}
 
-	r.POST("/Login", dbh.HandleUserLogin)
+	r.POST("/LogIn", dbh.HandleUserLogin)
 	r.POST("/SignUp", dbh.HandleUserSignUp)
 
 	r.GET("/UserPage/GetArticleAbstract", JWTAuthMiddleware(), dbh.HandleArticleAbstractRead)
@@ -49,7 +49,7 @@ func (dbh *MysqlHandler) HandleUserLogin(c *gin.Context) {
 			return
 		}
 		// 返回 Token
-		c.JSON(http.StatusOK, gin.H{"status": "success", "UID": user.UID, "token": token})
+		c.JSON(http.StatusOK, gin.H{"status": "success", "message": "log in succesfully", "uid": user.UID, "name": user.UserName, "token": token})
 	}
 }
 

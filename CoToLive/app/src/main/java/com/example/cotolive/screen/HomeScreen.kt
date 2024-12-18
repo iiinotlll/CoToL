@@ -15,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
@@ -22,15 +23,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cotolive.ui.theme.CoToLiveTheme
 
-// Article 类实现 MutableState<Article>
-data class Article(var title: String, var abstrct: String, val id: Int)
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenLayout(modifier: Modifier = Modifier, ) {
+    val fetchAbstractsViewModel : FetchAbstractsViewModel = viewModel()
+    LaunchedEffect(Unit) {
+        // 发起网络请求
+        fetchAbstractsViewModel.getArticleAbstracts()
+    }
+
     val items = listOf(
         "Item 1 - short",
         "Item 2 - longer item with more content",

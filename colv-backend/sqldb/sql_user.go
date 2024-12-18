@@ -17,10 +17,6 @@ type User struct {
 	CreateTime time.Time `gorm:"column:create_time"`
 }
 
-type ArticlesOfUser struct {
-	Articles []Article
-}
-
 func (db *MysqlDB) UserSignUp(inputName string, inputMail string, inputPwd string) error {
 	var exists bool
 	// 查询是否有匹配的记录

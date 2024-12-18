@@ -2,6 +2,7 @@ package com.example.cotolive.screen
 
 import android.util.Log
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -21,6 +22,7 @@ sealed interface LogInUiState {
 
 class LogInViewModel : ViewModel() {
     var logInUiState: LogInUiState by mutableStateOf(LogInUiState.Loading)
+    var logInCallCnt: Int by mutableIntStateOf(0)
         private set
 
 
@@ -30,9 +32,9 @@ class LogInViewModel : ViewModel() {
             logInUiState = LogInUiState.Loading
             try {
                 val logInResponse = CoToLiveApi.retrofitService.usrLogIn(logInReqMsg)
-                TokenManager.token = logInResponse.message
+                TokenManager.token = logInResponse.token
                 logInUiState = LogInUiState.Success(
-                    "Success: 登录成功, ${logInResponse.message}"
+                    "Success: 登录成功, 用户：${logInResponse.name}"
                 )
             } catch (e: IOException) {
                 Log.e("LogInViewModel", "Network error", e)
@@ -43,6 +45,7 @@ class LogInViewModel : ViewModel() {
                 val errorMessage = e.response()?.errorBody()?.string() ?: "服务器错误，请稍后再试"
                 logInUiState = LogInUiState.Error(errorMessage)
             }
+            logInCallCnt ++
         }
     }
 }

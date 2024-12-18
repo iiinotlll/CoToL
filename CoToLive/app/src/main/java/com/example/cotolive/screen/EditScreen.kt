@@ -33,12 +33,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cotolive.R
+import com.example.cotolive.network.ArticleAbstract
 import com.example.cotolive.ui.theme.CoToLiveTheme
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditScreenLayout(modifier: Modifier = Modifier, article: MutableState<Article>) {
+fun EditScreenLayout(modifier: Modifier = Modifier, article: MutableState<ArticleAbstract>) {
     var isEditMode by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -104,9 +105,9 @@ fun EditScreenLayout(modifier: Modifier = Modifier, article: MutableState<Articl
             Spacer(modifier = Modifier.height(16.dp))
 
             TextField(
-                value = article.value.abstrct,
+                value = article.value.abstract,
                 onValueChange = {
-                    if (isEditMode) article.value = article.value.copy(abstrct = it)
+                    if (isEditMode) article.value = article.value.copy(abstract = it)
                 },
                 enabled = isEditMode,
                 modifier = Modifier.fillMaxWidth(),
@@ -133,7 +134,7 @@ fun EditScreenLayout(modifier: Modifier = Modifier, article: MutableState<Articl
 @Composable
 fun EditScreenPreview() {
     CoToLiveTheme {
-        val article = remember { mutableStateOf(Article("Sample Title", "Sample Abstract", 1)) }
+        val article = remember { mutableStateOf(ArticleAbstract(1,2,"Sample Title", "Sample Abstract")) }
         EditScreenLayout(article = article)
     }
 }
