@@ -35,11 +35,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cotolive.ui.theme.CoToLiveTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
-
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.cotolive.navigation.AppNavigation
 
 
 @Composable
-fun SignUpScreenLayout(modifier: Modifier = Modifier) {
+fun SignUpScreenLayout(modifier: Modifier = Modifier, navController: NavController) {
     var userMail by remember { mutableStateOf("") }
     var userPwd by remember { mutableStateOf("") }
     var userName by remember { mutableStateOf("") }
@@ -53,9 +55,9 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier) {
     val signUpState = signUpViewModelInLayout.signUpUiState
 
     Column(
-        modifier = Modifier
-            .padding(30.dp)
+        modifier = modifier
             .fillMaxSize()
+            .padding(30.dp)
             .padding(top = 80.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -293,6 +295,8 @@ fun checkSignUpInputContent (userMail: String, userName: String, userPwd: String
 @Composable
 fun SignUpScreenPreview() {
     CoToLiveTheme {
-        SignUpScreenLayout()
+        val navController = rememberNavController()
+        AppNavigation(navController)
+        SignUpScreenLayout(navController = navController)
     }
 }

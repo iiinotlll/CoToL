@@ -34,11 +34,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import com.example.cotolive.navigation.AppNavigation
 import com.example.cotolive.ui.theme.CoToLiveTheme
 import kotlin.math.log
 
 @Composable
-fun LogInScreenLayout(modifier: Modifier = Modifier) {
+fun LogInScreenLayout(modifier: Modifier = Modifier, navController: NavController) {
     var userMail by remember { mutableStateOf("") }
     var userPwd by remember { mutableStateOf("") }
 
@@ -52,8 +55,8 @@ fun LogInScreenLayout(modifier: Modifier = Modifier) {
 
     Column(
         modifier = Modifier
-            .padding(30.dp)
             .fillMaxSize()
+            .padding(30.dp)
             .padding(top = 90.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -160,7 +163,7 @@ fun LogInScreenLayout(modifier: Modifier = Modifier) {
                 shape = RoundedCornerShape(30.dp) // 边框形状
                 ),
             onClick = {
-//                TODO: navigate to signUp.
+                    navController.navigate("SignUpScreen")
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.White,
@@ -221,6 +224,8 @@ private fun checkLogInInputContent(mail: String, pwd: String): String{
 @Composable
 fun LogInScreenPreview() {
     CoToLiveTheme {
-        LogInScreenLayout()
+        val navController = rememberNavController()
+        AppNavigation(navController)
+        LogInScreenLayout(navController = navController)
     }
 }

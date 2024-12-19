@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,14 +31,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.cotolive.R
 import com.example.cotolive.network.ArticleAbstract
 import com.example.cotolive.ui.theme.CoToLiveTheme
+import com.example.cotolive.navigation.AppNavigation
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditScreenLayout(modifier: Modifier = Modifier, article: MutableState<ArticleAbstract>) {
+fun EditScreenLayout(modifier: Modifier = Modifier, navController: NavController, article: MutableState<ArticleAbstract>, ) {
     var isEditMode by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -135,6 +137,8 @@ fun EditScreenLayout(modifier: Modifier = Modifier, article: MutableState<Articl
 fun EditScreenPreview() {
     CoToLiveTheme {
         val article = remember { mutableStateOf(ArticleAbstract(1,2,"Sample Title", "Sample Abstract")) }
-        EditScreenLayout(article = article)
+        val navController = rememberNavController()
+        AppNavigation(navController)
+        EditScreenLayout(navController=navController, article = article)
     }
 }
