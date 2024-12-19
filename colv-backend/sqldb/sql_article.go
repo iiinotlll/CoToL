@@ -58,3 +58,33 @@ func (db *MysqlDB) FindAllArticlesAbstracts(uid uint) ([]Article, error) {
 	}
 	return articles, nil
 }
+
+func (db *MysqlDB) ModifyArticle(uid, aid uint, title, article_data string) error {
+	// 检查用户是否拥有该文章
+	var article Article
+	if err := db.DB.
+		Where("article_id = ? AND belongsto_uid = ?", aid, uid).
+		First(&article).Error; err != nil {
+		// 如果查询不到文章，说明该用户没有该文章
+		return fmt.Errorf("文章不存在或用户没有权限修改该文章")
+	}
+
+	// 如果找到了文章，更新文章内容
+	updateFields := map[string]interface{}{}
+	if title != "" {
+		updateFields["title"] = title
+	}
+	if article_data != "" {
+		updateFields["data_content"] = article_data // 使用数据库中的列名
+	}
+
+	// 执行更新操作
+	if err := db.DB.
+		Model(&Article{}).
+		Where("article_id = ?", aid).
+		Updates(updateFields).Error; err != nil {
+		return err
+	}
+
+	return nil
+}

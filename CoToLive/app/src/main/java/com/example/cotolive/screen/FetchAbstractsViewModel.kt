@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cotolive.network.ArticleAbstract
 import com.example.cotolive.network.CoToLiveApi
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -20,6 +21,7 @@ sealed interface FetchAbstractUiState {
 
 class FetchAbstractsViewModel : ViewModel() {
     var fetchAbstractUiState: FetchAbstractUiState by mutableStateOf(FetchAbstractUiState.Loading)
+    var fetchAbstractsResults : List<ArticleAbstract> by mutableStateOf(emptyList())
         private set
 
 
@@ -31,8 +33,9 @@ class FetchAbstractsViewModel : ViewModel() {
                 val fetchAbstractResponse = CoToLiveApi.retrofitService.articleAbstractsFetch()
                 Log.d("FetchAbstractViewModel", "Abstract fetch is sent")
                 fetchAbstractUiState = FetchAbstractUiState.Success(
-                    "Success: 查找成功, 文章为：$fetchAbstractResponse"
+                    "Success: 查找成功"
                 )
+                fetchAbstractsResults = fetchAbstractResponse.message
             } catch (e: IOException) {
                 Log.e("FetchAbstractViewModel", "Network error", e)
                 fetchAbstractUiState = FetchAbstractUiState.Error("网络错误，请稍后再试")

@@ -23,6 +23,7 @@ func GinStart() {
 	r.GET("/UserPage/GetArticleAbstract", JWTAuthMiddleware(), dbh.HandleArticleAbstractRead)
 	r.POST("/UserPage/PostArticle", JWTAuthMiddleware(), dbh.HandleArticlePost)
 	r.GET("/UserPage/ReadArticle", JWTAuthMiddleware(), dbh.HandleArticleRead)
+	r.PUT("/UserPage/ModifyArticle", JWTAuthMiddleware(), dbh.HandleAriticleModify)
 
 	r.Run(":8088")
 }
@@ -117,7 +118,6 @@ func (dbh *MysqlHandler) HandleArticleRead(c *gin.Context) {
 		return
 	}
 
-	// try to sign up
 	if article_data, err := dbh.DB.GetArticle(uint(userID.(float64)), articleRead.ArticleID); err != nil {
 		c.JSON(500, gin.H{"status": "error", "message": err.Error()})
 	} else {
@@ -132,10 +132,35 @@ func (dbh *MysqlHandler) HandleArticleAbstractRead(c *gin.Context) {
 		return
 	}
 
-	// try to sign up
 	if article_data, err := dbh.DB.FindAllArticlesAbstracts(uint(userID.(float64))); err != nil {
 		c.JSON(500, gin.H{"status": "error", "message": err.Error()})
 	} else {
 		c.JSON(200, gin.H{"status": "success", "message": article_data})
+	}
+}
+
+func (dbh *MysqlHandler) HandleAriticleModify(c *gin.Context) {
+	userID, exists := c.Get("UID")
+	if !exists {
+		c.JSON(400, gin.H{"status": "error", "message": "UID not found"})
+		return
+	}
+
+	var articleModify struct {
+		AID     uint   `json:"ArticleID" binding:"required"`
+		Title   string `json:"Title" binding:"required"`
+		Content string `json:"Content" binding:"required"`
+	}
+
+	// bind json
+	if err := c.ShouldBind(&articleModify); err != nil {
+		c.JSON(400, gin.H{"status": "error", "message": "invalid request"})
+		return
+	}
+
+	if err := dbh.DB.ModifyArticle(uint(userID.(float64)), articleModify.AID, articleModify.Title, articleModify.Content); err != nil {
+		c.JSON(500, gin.H{"status": "error", "message": err.Error()})
+	} else {
+		c.JSON(200, gin.H{"status": "success", "message": "OK"})
 	}
 }

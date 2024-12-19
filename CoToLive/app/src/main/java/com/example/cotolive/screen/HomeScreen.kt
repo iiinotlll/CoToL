@@ -1,5 +1,6 @@
 package com.example.cotolive.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +15,8 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -26,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,7 +38,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.cotolive.navigation.AppNavigation
+import com.example.cotolive.R
+import com.example.cotolive.navigation.CoToLScreen
+import com.example.cotolive.network.ArticleAbstract
 import com.example.cotolive.ui.theme.CoToLiveTheme
 
 
@@ -44,6 +50,7 @@ fun HomeScreenLayout(modifier: Modifier = Modifier, navController: NavController
     val fetchAbstractsViewModel: FetchAbstractsViewModel = viewModel()
     val fetchAbstractsUiState = fetchAbstractsViewModel.fetchAbstractUiState
     var isLoading by remember { mutableStateOf(true) }
+    var articleItems = fetchAbstractsViewModel.fetchAbstractsResults
 
     LaunchedEffect(Unit) {
         // 发起网络请求
@@ -64,15 +71,6 @@ fun HomeScreenLayout(modifier: Modifier = Modifier, navController: NavController
         }
     }
 
-    val items = listOf(
-        "Item 1 - short",
-        "Item 2 - longer item with more content",
-        "Item 3",
-        "Item 4 - this is a longer item to show varying heights",
-        "Item 5",
-        "Item 6 - this is a longer item to show varying heights"
-    )
-
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -90,6 +88,17 @@ fun HomeScreenLayout(modifier: Modifier = Modifier, navController: NavController
                         containerColor = Color(0xFFEFEBDC), // 设置背景颜色
                         titleContentColor = Color.Black
                     ),
+                    actions = {
+                        IconButton(
+                            onClick = { navController.navigate(CoToLScreen.NewPost.name) },
+                            modifier = Modifier.height(30.dp)
+                            ) {
+                            Icon(
+                                painter = painterResource(R.drawable.add),
+                                contentDescription = "Add Button"
+                            )
+                        }
+                    }
                 )
 
                 HorizontalDivider( // 为分界线设置一些间距
@@ -118,20 +127,24 @@ fun HomeScreenLayout(modifier: Modifier = Modifier, navController: NavController
 
         } else {
             Column(modifier = modifier.padding(innerPadding)) {
-                SingleColumnLayout(items)
+                SingleColumnLayout(articleItems, navController)
             }
         }
     }
 }
 
 @Composable
-fun SingleColumnLayout(items: List<String>) {
+fun SingleColumnLayout(items: List<ArticleAbstract>, navController: NavController) {
     Column(modifier = Modifier.fillMaxSize()) {
         items.forEach { item ->
             Card(
                 modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxWidth(),
+                    .padding(15.dp)
+                    .fillMaxWidth()
+                    .clickable {
+                        // 当点击卡片时执行跳转
+                        navController.navigate(CoToLScreen.Edit.name + "/${item.aid}")
+                    },
                 elevation = CardDefaults.elevatedCardElevation(4.dp)
             ) {
                 Box(
@@ -140,8 +153,8 @@ fun SingleColumnLayout(items: List<String>) {
                         .wrapContentHeight() // 高度自适应
                 ) {
                     Column {
-                        Text(text = item, fontSize = 20.sp)
-                        Text(text = item, fontSize = 10.sp)
+                        Text(text = item.title+"...", fontSize = 20.sp)
+                        Text(text = item.abstract+"...", fontSize = 15.sp)
                     }
                 }
             }
@@ -155,7 +168,6 @@ fun SingleColumnLayout(items: List<String>) {
 fun HomeScreenPreview() {
     CoToLiveTheme {
         val navController = rememberNavController()
-        AppNavigation(navController)
         HomeScreenLayout(navController = navController)
     }
 }

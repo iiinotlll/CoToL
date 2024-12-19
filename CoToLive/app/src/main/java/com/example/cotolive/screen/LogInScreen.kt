@@ -37,6 +37,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cotolive.navigation.AppNavigation
+import com.example.cotolive.navigation.CoToLScreen
 import com.example.cotolive.ui.theme.CoToLiveTheme
 import kotlin.math.log
 
@@ -163,7 +164,7 @@ fun LogInScreenLayout(modifier: Modifier = Modifier, navController: NavControlle
                 shape = RoundedCornerShape(30.dp) // 边框形状
                 ),
             onClick = {
-                    navController.navigate("SignUpScreen")
+                    navController.navigate(CoToLScreen.SignUp.name)
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.White,
@@ -198,6 +199,8 @@ fun LogInScreenLayout(modifier: Modifier = Modifier, navController: NavControlle
                     checkResult = logInUiState.message
                     showPopUp = true
                     popUpOk = true
+
+                    navController.navigate(CoToLScreen.Home.name)
                 }
                 else -> { /* Loading 状态无需处理 */ }
             }
@@ -225,7 +228,6 @@ private fun checkLogInInputContent(mail: String, pwd: String): String{
 fun LogInScreenPreview() {
     CoToLiveTheme {
         val navController = rememberNavController()
-        AppNavigation(navController)
         LogInScreenLayout(navController = navController)
     }
 }

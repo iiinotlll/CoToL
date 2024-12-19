@@ -1,6 +1,7 @@
 package com.example.cotolive.screen
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -26,6 +29,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -37,7 +42,9 @@ import com.example.cotolive.ui.theme.CoToLiveTheme
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.cotolive.R
 import com.example.cotolive.navigation.AppNavigation
+import com.example.cotolive.navigation.CoToLScreen
 
 
 @Composable
@@ -54,11 +61,20 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier, navController: NavControll
     val signUpViewModelInLayout: SignUpViewModel = viewModel()  // 这里使用 viewModel() 获取 ViewModel 实例
     val signUpState = signUpViewModelInLayout.signUpUiState
 
+    IconButton(
+        modifier = modifier.padding(top = 30.dp).height(30.dp),
+        onClick = { navController.popBackStack() }) {
+        Icon(
+            painter = painterResource(R.drawable.back),
+            contentDescription = "Back Button"
+        )
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(30.dp)
-            .padding(top = 80.dp),
+            .padding(top = 90.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
@@ -92,7 +108,7 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier, navController: NavControll
                     fontSize = 14.sp,
                 )
             },
-            textStyle = TextStyle(fontSize = 20.sp),
+            textStyle = TextStyle(fontSize = 18.sp),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Blue, // 聚焦时的指示器颜色
                 unfocusedIndicatorColor = Color.Gray, // 非聚焦时的指示器颜色
@@ -115,7 +131,7 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier, navController: NavControll
                     fontSize = 22.sp,
                 )
             },
-            textStyle = TextStyle(fontSize = 20.sp),
+            textStyle = TextStyle(fontSize = 18.sp),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Blue, // 聚焦时的指示器颜色
                 unfocusedIndicatorColor = Color.Gray, // 非聚焦时的指示器颜色
@@ -214,7 +230,11 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier, navController: NavControll
         AlertPopup(modifier = Modifier, showPopUp, checkResult, { showPopUp = false }, popUpOk)
 
         if (isLoading) {
-            CircularProgressIndicator(modifier = Modifier.padding(top = 30.dp).align(Alignment.CenterHorizontally))
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .padding(top = 30.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
         }
 
         // 当 signUpUiState 改变时重新执行
@@ -226,14 +246,19 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier, navController: NavControll
                     checkResult = signUpState.message
                     showPopUp = true
                 }
+
                 is SignUpUiState.Success -> {
                     // 注册成功，显示成功信息
                     Log.d("SignUp", "注册成功")
                     checkResult = "注册成功"
                     showPopUp = true
                     popUpOk = true
+
+                    navController.navigate(CoToLScreen.LogIn.name)
                 }
-                else -> { /* Loading 状态无需处理 */ }
+
+                else -> { /* Loading 状态无需处理 */
+                }
             }
         }
 
@@ -244,11 +269,14 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier, navController: NavControll
 }
 
 
-
-
-
 @Composable
-fun AlertPopup(modifier: Modifier = Modifier, showPopup: Boolean, checkResult: String, onDismiss: () -> Unit, isOk: Boolean) {
+fun AlertPopup(
+    modifier: Modifier = Modifier,
+    showPopup: Boolean,
+    checkResult: String,
+    onDismiss: () -> Unit,
+    isOk: Boolean,
+) {
     if (checkResult == "") return
     if (showPopup) {
         // 启动协程在3秒后关闭弹窗
@@ -264,11 +292,11 @@ fun AlertPopup(modifier: Modifier = Modifier, showPopup: Boolean, checkResult: S
                 .fillMaxWidth()
                 .padding(20.dp)
                 .border(1.dp, Color.Transparent, RoundedCornerShape(10.dp))
-                .background(if (isOk)  Color(0xA0D5E7B5) else Color(0xF0FFCCE1)),
+                .background(if (isOk) Color(0xA0D5E7B5) else Color(0xF0FFCCE1)),
         ) {
             Text(
                 text = checkResult,
-                modifier= Modifier.padding(4.dp),
+                modifier = Modifier.padding(4.dp),
                 color = Color.Black,
                 fontSize = 16.sp
             )
@@ -276,7 +304,12 @@ fun AlertPopup(modifier: Modifier = Modifier, showPopup: Boolean, checkResult: S
     }
 }
 
-fun checkSignUpInputContent (userMail: String, userName: String, userPwd: String, pwdRecheck: String): String {
+fun checkSignUpInputContent(
+    userMail: String,
+    userName: String,
+    userPwd: String,
+    pwdRecheck: String
+): String {
     if (userMail == "")
         return "邮箱不能为空！"
     if (userName == "")
@@ -289,14 +322,11 @@ fun checkSignUpInputContent (userMail: String, userName: String, userPwd: String
 }
 
 
-
-
 @Preview
 @Composable
 fun SignUpScreenPreview() {
     CoToLiveTheme {
         val navController = rememberNavController()
-        AppNavigation(navController)
         SignUpScreenLayout(navController = navController)
     }
 }

@@ -7,8 +7,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Query
 
 private const val BASE_URL = "http://10.0.2.2:8088/"
@@ -54,6 +54,15 @@ interface CoToLiveApiService {
 
     @GET("/UserPage/GetArticleAbstract")
     suspend fun articleAbstractsFetch(): ArticleAbstractResponseMessage
+
+    @GET("/UserPage/ReadArticle")
+    suspend fun articleRead(@Query("ArticleID") articleID: Int): ArticleResponseMessage
+
+    @PUT("/UserPage/ModifyArticle")
+    suspend fun articleModify(@Body article: ArticleSent): ArticlePostResponseMessage
+
+    @POST("/UserPage/PostArticle")
+    suspend fun articlePost(@Body article: ArticleSent): ArticlePostResponseMessage
 }
 
 // 单例对象，用于提供 Retrofit 服务

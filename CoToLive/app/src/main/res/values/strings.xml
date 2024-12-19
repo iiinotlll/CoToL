@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">CoToLive</string>
+    <string name="homeScreen">HomeScreen</string>
+    <string name="loginScreen">LogInScreen</string>
+    <string name="signupScreen">SignUpScreen</string>
+    <string name="editScreen">EditScreen</string>
+    <string name="newpostScreen">NewPostScreen</string>
 </resources>
