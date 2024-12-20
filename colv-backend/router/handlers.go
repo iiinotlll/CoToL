@@ -24,6 +24,7 @@ func GinStart() {
 	r.POST("/UserPage/PostArticle", JWTAuthMiddleware(), dbh.HandleArticlePost)
 	r.GET("/UserPage/ReadArticle", JWTAuthMiddleware(), dbh.HandleArticleRead)
 	r.PUT("/UserPage/ModifyArticle", JWTAuthMiddleware(), dbh.HandleAriticleModify)
+	r.DELETE("/UserPage/DeleteAritcle", JWTAuthMiddleware(), dbh.HandleAriticleDelete)
 
 	r.Run(":8088")
 }
@@ -159,6 +160,30 @@ func (dbh *MysqlHandler) HandleAriticleModify(c *gin.Context) {
 	}
 
 	if err := dbh.DB.ModifyArticle(uint(userID.(float64)), articleModify.AID, articleModify.Title, articleModify.Content); err != nil {
+		c.JSON(500, gin.H{"status": "error", "message": err.Error()})
+	} else {
+		c.JSON(200, gin.H{"status": "success", "message": "OK"})
+	}
+}
+
+func (dbh *MysqlHandler) HandleAriticleDelete(c *gin.Context) {
+	userID, exists := c.Get("UID")
+	if !exists {
+		c.JSON(400, gin.H{"status": "error", "message": "UID not found"})
+		return
+	}
+
+	var articleDelete struct {
+		AID uint `json:"ArticleID" binding:"required"`
+	}
+
+	// bind json
+	if err := c.ShouldBind(&articleDelete); err != nil {
+		c.JSON(400, gin.H{"status": "error", "message": "invalid request"})
+		return
+	}
+
+	if err := dbh.DB.DelArticle(uint(userID.(float64)), articleDelete.AID); err != nil {
 		c.JSON(500, gin.H{"status": "error", "message": err.Error()})
 	} else {
 		c.JSON(200, gin.H{"status": "success", "message": "OK"})
