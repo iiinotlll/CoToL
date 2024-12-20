@@ -1,12 +1,16 @@
 package com.example.cotolive.screen
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,34 +40,36 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.cotolive.R
-import com.example.cotolive.network.ArticleGet
 import com.example.cotolive.network.ArticleSent
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditScreenLayout(
-    modifier: Modifier = Modifier,
-    navController: NavController,
-    articleID: String?
+    modifier: Modifier = Modifier, navController: NavController, articleID: String?
 ) {
     val aid = articleID?.toIntOrNull() ?: -1 // 如果转换失败，默认值为 -1
     if (aid == -1) {
         navController.popBackStack()
     }
 
+    var delDialogOpen by remember { mutableStateOf(false) }
     var isEditMode by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
 
-    var articleReadViewModel: ArticleManageViewModel = viewModel()
-    var articleReadUiState = articleReadViewModel.articleReadUiState
-    var articleResult = articleReadViewModel.articleReadResult
+    var articleManageViewModel: ArticleManageViewModel = viewModel()
+    var articleReadUiState = articleManageViewModel.articleReadUiState
+    var articleResult = articleManageViewModel.articleReadResult
     var editingTitle by remember { mutableStateOf("") }
     var editingContent by remember { mutableStateOf("") }
 
-    fun onBackPressed () {
+    fun onBackPressed() {
         if (articleResult.title != editingTitle || articleResult.content != editingContent) {
-            articleReadViewModel.modifyArticle(ArticleSent(aid = aid, title = editingTitle, content = editingContent))
+            articleManageViewModel.modifyArticle(
+                ArticleSent(
+                    aid = aid, title = editingTitle, content = editingContent
+                )
+            )
             isLoading = true
         }
         navController.popBackStack()
@@ -71,7 +77,7 @@ fun EditScreenLayout(
 
     LaunchedEffect(Unit) {
         // 发起网络请求
-        articleReadViewModel.readArticle(aid)
+        articleManageViewModel.readArticle(aid)
     }
 
     LaunchedEffect(articleReadUiState) {
@@ -96,39 +102,42 @@ fun EditScreenLayout(
         modifier = modifier.fillMaxSize(),
         topBar = {
             Column {
-                CenterAlignedTopAppBar(
-                    navigationIcon = {
-                        IconButton(
-                            modifier = modifier.height(30.dp),
-                            onClick = { onBackPressed() }
-                        ) {
-                            Icon(
-                                painter = painterResource(R.drawable.back),
-                                contentDescription = "Back Button"
-                            )
-                        }
-                    },
-                    title = {
+                CenterAlignedTopAppBar(navigationIcon = {
+                    IconButton(modifier = modifier.height(30.dp), onClick = { onBackPressed() }) {
+                        Icon(
+                            painter = painterResource(R.drawable.back),
+                            contentDescription = "Back Button"
+                        )
+                    }
+                }, title = {
+                    Row (verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = if (isEditMode) "Edit" else "View",
                             fontSize = 24.sp,
                             fontWeight = FontWeight(800),
                             fontFamily = FontFamily.Monospace
                         )
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color(0xFFEFEBDC), // 设置背景颜色
-                        titleContentColor = Color.Black
-                    ),
-                    actions = {
+                        Spacer(modifier = Modifier.width(16.dp))
                         IconButton(onClick = { isEditMode = !isEditMode }) {
                             Icon(
-                                painter = painterResource(if (!isEditMode) R.drawable.eye else  R.drawable.edit_text),
+                                painter = painterResource(if (!isEditMode) R.drawable.eye else R.drawable.edit_text),
                                 contentDescription = "Edit Button"
                             )
                         }
                     }
-                )
+                }, colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFEFEBDC), // 设置背景颜色
+                    titleContentColor = Color.Black
+                ), actions = {
+                    IconButton(onClick = {
+                        delDialogOpen = true
+                    }) {
+                        Icon(
+                            painter = painterResource(R.drawable.deleteitem),
+                            contentDescription = "Search"
+                        )
+                    }
+                })
 
                 HorizontalDivider( // 为分界线设置一些间距
                     thickness = 1.5.dp, // 设置分界线的厚度
@@ -141,16 +150,14 @@ fun EditScreenLayout(
         if (isLoading) {
             // show loading page
             Column(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
             ) {
                 CircularProgressIndicator(modifier = Modifier.size(50.dp))
 
                 Text(
-                    modifier = Modifier.padding(top = 30.dp),
-                    text = "加载中"
+                    modifier = Modifier.padding(top = 30.dp), text = "加载中"
                 )
             }
         } else {
@@ -204,7 +211,31 @@ fun EditScreenLayout(
 
                 Spacer(modifier = Modifier.height(24.dp))
             }
+
+            if (delDialogOpen) {
+                AlertDialog(onDismissRequest = {
+                    delDialogOpen = false
+                }, title = {
+                    Text(text = "删除 ${editingTitle}？")
+                }, text = {
+                    Text(text = "你确定要删除这个文章吗？")
+                }, confirmButton = {
+                    Button(onClick = {
+                        articleManageViewModel.delArticle(aid)
+                        navController.popBackStack() // 返回上一页
+                    }) {
+                        Text("确认")
+                    }
+                }, dismissButton = {
+                    Button(onClick = {
+                        delDialogOpen = false
+                    }) {
+                        Text("取消")
+                    }
+                })
+            }
         }
     }
 }
+
 

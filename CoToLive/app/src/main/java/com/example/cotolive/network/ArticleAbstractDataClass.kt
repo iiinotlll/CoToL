@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 
 data class ArticleAbstract(
-    @SerializedName("AID") val aid: Long,
+    @SerializedName("AID") val aid: Int,
     @SerializedName("BelongsToUID") val belongsToUid: Long,
     @SerializedName("Title") val title: String,
     @SerializedName("Data") val abstract: String

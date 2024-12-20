@@ -6,6 +6,7 @@ import okhttp3.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -63,6 +64,9 @@ interface CoToLiveApiService {
 
     @POST("/UserPage/PostArticle")
     suspend fun articlePost(@Body article: ArticleSent): ArticlePostResponseMessage
+
+    @POST("/UserPage/DeleteArticle")
+    suspend fun articleDelete(@Body articleDelId: ArticleDel): ArticlePostResponseMessage
 }
 
 // 单例对象，用于提供 Retrofit 服务

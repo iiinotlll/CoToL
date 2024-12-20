@@ -8,9 +8,13 @@ data class ArticleSent(
     @SerializedName("Content") val content: String
 )
 
+data class ArticleDel(
+    @SerializedName("ArticleID") val aid: Int,
+)
+
 data class ArticleGet(
-    @SerializedName("AID") val aid: Long,
-    @SerializedName("BelongsToUID") val belongsToUid: Long,
+    @SerializedName("AID") val aid: Int,
+    @SerializedName("BelongsToUID") val belongsToUid: Int,
     @SerializedName("Title") val title: String,
     @SerializedName("Data") val content: String
 )

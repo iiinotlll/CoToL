@@ -24,7 +24,7 @@ func GinStart() {
 	r.POST("/UserPage/PostArticle", JWTAuthMiddleware(), dbh.HandleArticlePost)
 	r.GET("/UserPage/ReadArticle", JWTAuthMiddleware(), dbh.HandleArticleRead)
 	r.PUT("/UserPage/ModifyArticle", JWTAuthMiddleware(), dbh.HandleAriticleModify)
-	r.DELETE("/UserPage/DeleteAritcle", JWTAuthMiddleware(), dbh.HandleAriticleDelete)
+	r.POST("/UserPage/DeleteArticle", JWTAuthMiddleware(), dbh.HandleAriticleDelete)
 
 	r.Run(":8088")
 }
