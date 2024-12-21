@@ -154,7 +154,8 @@ class LogInViewModel : ViewModel() {
 **由此可见，view model 为网络请求提供了一个优雅的调用方式，其中自带了接收请求、异常处理等功能。**
 
 #### Navigation 设计
-前端采用了 NavHost 来定义跳转。
+前端采用了 NavHost 来定义跳转。代码位于 `CoToLive\app\src\main\java\com\example\cotolive\navigation\AppNavigation.kt` 文件下。
+
 跳转的逻辑如下：
 ![](./figs/navigations.jpeg)
 
@@ -282,7 +283,7 @@ POST|`/UserPage/DeleteArticle`|处理 article 删除请求|
 
 ## 软件架构图
 本软件的架构图如下：
-
+![](./figs/架构图.jpeg)
 
 ## 技术亮点及其实现原理
 
