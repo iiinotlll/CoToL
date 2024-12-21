@@ -41,12 +41,14 @@ import androidx.navigation.compose.rememberNavController
 import com.example.cotolive.R
 import com.example.cotolive.navigation.CoToLScreen
 import com.example.cotolive.network.ArticleAbstract
+import com.example.cotolive.network.ArticleSent
+import com.example.cotolive.snackBar.SnackbarViewModel
 import com.example.cotolive.ui.theme.CoToLiveTheme
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreenLayout(modifier: Modifier = Modifier, navController: NavController) {
+fun HomeScreenLayout(modifier: Modifier = Modifier, navController: NavController, snackbarViewModel : SnackbarViewModel) {
     val fetchAbstractsViewModel: FetchAbstractsViewModel = viewModel()
     val fetchAbstractsUiState = fetchAbstractsViewModel.fetchAbstractUiState
     var isLoading by remember { mutableStateOf(true) }
@@ -63,7 +65,7 @@ fun HomeScreenLayout(modifier: Modifier = Modifier, navController: NavController
                 isLoading = false
             }
             is FetchAbstractUiState.Error -> {
-
+                snackbarViewModel.showErrSnackbar("获取页面失败")
             }
             is FetchAbstractUiState.Loading -> {
                 isLoading = true
@@ -76,6 +78,19 @@ fun HomeScreenLayout(modifier: Modifier = Modifier, navController: NavController
         topBar = {
             Column {
                 CenterAlignedTopAppBar(
+                    navigationIcon = {
+                        IconButton(
+                            modifier = modifier.height(30.dp),
+                            onClick = {
+                                navController.popBackStack()
+                            }
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.back),
+                                contentDescription = "Back Button"
+                            )
+                        }
+                    },
                     title = {
                         Text(
                             text = "Good Title",
@@ -153,7 +168,7 @@ fun SingleColumnLayout(items: List<ArticleAbstract>, navController: NavControlle
                         .wrapContentHeight() // 高度自适应
                 ) {
                     Column {
-                        Text(text = item.title+"...", fontSize = 20.sp)
+                        Text(text = item.title, fontSize = 20.sp)
                         Text(text = item.abstract+"...", fontSize = 15.sp)
                     }
                 }
@@ -168,6 +183,7 @@ fun SingleColumnLayout(items: List<ArticleAbstract>, navController: NavControlle
 fun HomeScreenPreview() {
     CoToLiveTheme {
         val navController = rememberNavController()
-        HomeScreenLayout(navController = navController)
+        val snackbarViewModel: SnackbarViewModel = viewModel()
+        HomeScreenLayout(navController = navController, snackbarViewModel = snackbarViewModel)
     }
 }

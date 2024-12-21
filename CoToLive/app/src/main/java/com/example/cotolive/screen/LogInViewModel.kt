@@ -34,7 +34,7 @@ class LogInViewModel : ViewModel() {
                 val logInResponse = CoToLiveApi.retrofitService.usrLogIn(logInReqMsg)
                 TokenManager.token = logInResponse.token
                 logInUiState = LogInUiState.Success(
-                    "Success: 登录成功, 用户：${logInResponse.name}"
+                    "登录成功, ${logInResponse.name}，你好。"
                 )
             } catch (e: IOException) {
                 Log.e("LogInViewModel", "Network error", e)
@@ -47,5 +47,9 @@ class LogInViewModel : ViewModel() {
             }
             logInCallCnt ++
         }
+    }
+
+    fun resetState () {
+        logInUiState = LogInUiState.Loading
     }
 }

@@ -22,6 +22,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,15 +41,21 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cotolive.R
 import com.example.cotolive.network.ArticleSent
+import com.example.cotolive.snackBar.SnackbarViewModel
 import com.example.cotolive.ui.theme.CoToLiveTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NewPostScreen(modifier: Modifier = Modifier, navController: NavController) {
+fun NewPostScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    snackbarViewModel: SnackbarViewModel
+) {
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
 
-    var articleUploadViewModel: ArticleManageViewModel = viewModel()
+    val articleUploadViewModel: ArticleManageViewModel = viewModel()
+    val articlePostUiState = articleUploadViewModel.articleNewPostUiState
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -81,10 +88,15 @@ fun NewPostScreen(modifier: Modifier = Modifier, navController: NavController) {
                         titleContentColor = Color.Black
                     ),
                     actions = {
-                        IconButton (
+                        IconButton(
                             onClick = {
-                                articleUploadViewModel.postNewArticle(ArticleSent(0, title, content))
-                                navController.popBackStack()
+                                articleUploadViewModel.postNewArticle(
+                                    ArticleSent(
+                                        0,
+                                        title,
+                                        content
+                                    )
+                                )
                             },
                         ) {
                             Icon(
@@ -159,6 +171,21 @@ fun NewPostScreen(modifier: Modifier = Modifier, navController: NavController) {
 
             Spacer(modifier = Modifier.height(24.dp))
         }
+
+        LaunchedEffect(articlePostUiState) {
+            when (articlePostUiState) {
+                is ArticleManageUiState.Success-> {
+                    snackbarViewModel.showOKSnackbar("上传成功。")
+                    navController.popBackStack()
+                }
+                is ArticleManageUiState.Error -> {
+                    snackbarViewModel.showErrSnackbar("上传失败。")
+                }
+                is ArticleManageUiState.Loading -> {
+
+                }
+            }
+        }
     }
 }
 
@@ -168,6 +195,7 @@ fun NewPostScreen(modifier: Modifier = Modifier, navController: NavController) {
 fun NewPostScreenPreview() {
     CoToLiveTheme {
         val navController = rememberNavController()
-        NewPostScreen(navController = navController)
+        val snackbarViewModel: SnackbarViewModel = viewModel()
+        NewPostScreen(navController = navController, snackbarViewModel = snackbarViewModel)
     }
 }

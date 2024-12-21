@@ -15,6 +15,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -38,21 +39,20 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cotolive.navigation.AppNavigation
 import com.example.cotolive.navigation.CoToLScreen
+import com.example.cotolive.snackBar.SnackbarViewModel
 import com.example.cotolive.ui.theme.CoToLiveTheme
 import kotlin.math.log
 
 @Composable
-fun LogInScreenLayout(modifier: Modifier = Modifier, navController: NavController) {
+fun LogInScreenLayout(modifier: Modifier = Modifier, navController: NavController, snackbarViewModel: SnackbarViewModel) {
     var userMail by remember { mutableStateOf("") }
     var userPwd by remember { mutableStateOf("") }
 
-    var showPopUp by remember { mutableStateOf(false) }
     var checkResult by remember { mutableStateOf("") }
-    var popUpOk by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
 
     val logInViewModelInLayout : LogInViewModel = viewModel()
-    val logInUiState = logInViewModelInLayout.logInUiState
+    var logInUiState = logInViewModelInLayout.logInUiState
 
     Column(
         modifier = Modifier
@@ -133,12 +133,11 @@ fun LogInScreenLayout(modifier: Modifier = Modifier, navController: NavControlle
                 .padding(top = 30.dp, start = 5.dp, end = 5.dp),
             enabled = !isLoading,
             onClick = {
-                popUpOk = false
                 isLoading = true
                 checkResult = checkLogInInputContent(userMail, userPwd)
                 if (checkResult != "") {
                     // 前端输入不合法，显示错误信息
-                    showPopUp = true
+                    snackbarViewModel.showErrSnackbar(checkResult)
                     isLoading = false
                 } else {
                     logInViewModelInLayout.postUsrLogIn(mail = userMail, password = userPwd)
@@ -166,6 +165,7 @@ fun LogInScreenLayout(modifier: Modifier = Modifier, navController: NavControlle
             onClick = {
                     navController.navigate(CoToLScreen.SignUp.name)
             },
+            enabled = !isLoading,
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.White,
                 contentColor = Color.Black
@@ -179,8 +179,6 @@ fun LogInScreenLayout(modifier: Modifier = Modifier, navController: NavControlle
             )
         }
 
-        AlertPopup(showPopup = showPopUp, checkResult = checkResult, onDismiss = { showPopUp = false}, isOk = popUpOk)
-
         if (isLoading) {
             CircularProgressIndicator(modifier = Modifier.padding(top = 30.dp).align(Alignment.CenterHorizontally))
         }
@@ -190,17 +188,19 @@ fun LogInScreenLayout(modifier: Modifier = Modifier, navController: NavControlle
                 is LogInUiState.Error -> {
                     // 后端错误，显示错误信息
                     Log.e("LogIn", "登录失败")
-                    checkResult = logInUiState.message
-                    showPopUp = true
+                    checkResult = "登陆失败"
+                    snackbarViewModel.showErrSnackbar(checkResult)
                 }
                 is LogInUiState.Success -> {
                     // 登录成功，显示成功信息
                     Log.d("LogIn", "登录成功")
                     checkResult = logInUiState.message
-                    showPopUp = true
-                    popUpOk = true
+                    snackbarViewModel.showOKSnackbar(checkResult)
 
                     navController.navigate(CoToLScreen.Home.name)
+
+                    // 重置 state
+                    logInViewModelInLayout.resetState()
                 }
                 else -> { /* Loading 状态无需处理 */ }
             }
@@ -228,6 +228,7 @@ private fun checkLogInInputContent(mail: String, pwd: String): String{
 fun LogInScreenPreview() {
     CoToLiveTheme {
         val navController = rememberNavController()
-        LogInScreenLayout(navController = navController)
+        val snackbarViewModel: SnackbarViewModel = viewModel()
+        LogInScreenLayout(navController = navController, snackbarViewModel = snackbarViewModel)
     }
 }

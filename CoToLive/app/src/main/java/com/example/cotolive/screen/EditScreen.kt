@@ -41,12 +41,16 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.cotolive.R
 import com.example.cotolive.network.ArticleSent
+import com.example.cotolive.snackBar.SnackbarViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditScreenLayout(
-    modifier: Modifier = Modifier, navController: NavController, articleID: String?
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    articleID: String?,
+    snackbarViewModel: SnackbarViewModel
 ) {
     val aid = articleID?.toIntOrNull() ?: -1 // 如果转换失败，默认值为 -1
     if (aid == -1) {
@@ -103,14 +107,16 @@ fun EditScreenLayout(
         topBar = {
             Column {
                 CenterAlignedTopAppBar(navigationIcon = {
-                    IconButton(modifier = modifier.height(30.dp), onClick = { onBackPressed() }) {
+                    IconButton(
+                        modifier = modifier.height(30.dp),
+                        onClick = { onBackPressed() }) {
                         Icon(
                             painter = painterResource(R.drawable.back),
                             contentDescription = "Back Button"
                         )
                     }
                 }, title = {
-                    Row (verticalAlignment = Alignment.CenterVertically) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = if (isEditMode) "Edit" else "View",
                             fontSize = 24.sp,
@@ -222,7 +228,7 @@ fun EditScreenLayout(
                 }, confirmButton = {
                     Button(onClick = {
                         articleManageViewModel.delArticle(aid)
-                        navController.popBackStack() // 返回上一页
+                        delDialogOpen = false
                     }) {
                         Text("确认")
                     }
@@ -233,6 +239,23 @@ fun EditScreenLayout(
                         Text("取消")
                     }
                 })
+            }
+
+            LaunchedEffect(articleManageViewModel.articleDelUiState) {
+                when (articleManageViewModel.articleDelUiState) {
+                    is ArticleManageUiState.Success -> {
+                        snackbarViewModel.showOKSnackbar("删除成功。")
+                        navController.popBackStack() // 返回上一页
+                    }
+
+                    is ArticleManageUiState.Error -> {
+                        snackbarViewModel.showErrSnackbar("删除失败。")
+                    }
+
+                    is ArticleManageUiState.Loading -> {
+
+                    }
+                }
             }
         }
     }

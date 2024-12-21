@@ -45,24 +45,30 @@ import androidx.navigation.compose.rememberNavController
 import com.example.cotolive.R
 import com.example.cotolive.navigation.AppNavigation
 import com.example.cotolive.navigation.CoToLScreen
+import com.example.cotolive.snackBar.SnackbarViewModel
 
 
 @Composable
-fun SignUpScreenLayout(modifier: Modifier = Modifier, navController: NavController) {
+fun SignUpScreenLayout(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    snackbarViewModel: SnackbarViewModel
+) {
     var userMail by remember { mutableStateOf("") }
     var userPwd by remember { mutableStateOf("") }
     var userName by remember { mutableStateOf("") }
     var pwdReCheck by remember { mutableStateOf("") }
-    var showPopUp by remember { mutableStateOf(false) }
+
     var checkResult by remember { mutableStateOf("") }
-    var popUpOk by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
 
     val signUpViewModelInLayout: SignUpViewModel = viewModel()  // 这里使用 viewModel() 获取 ViewModel 实例
     val signUpState = signUpViewModelInLayout.signUpUiState
 
     IconButton(
-        modifier = modifier.padding(top = 30.dp).height(30.dp),
+        modifier = modifier
+            .padding(top = 30.dp)
+            .height(30.dp),
         onClick = { navController.popBackStack() }) {
         Icon(
             painter = painterResource(R.drawable.back),
@@ -201,12 +207,11 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier, navController: NavControll
                 .fillMaxWidth()
                 .padding(top = 40.dp, start = 5.dp, end = 5.dp),
             onClick = {
-                popUpOk = false
                 isLoading = true
                 checkResult = checkSignUpInputContent(userMail, userName, userPwd, pwdReCheck)
                 if (checkResult != "") {
                     // 前端输入不合法，显示错误信息
-                    showPopUp = true
+                    snackbarViewModel.showErrSnackbar(checkResult)
                     isLoading = false
                 } else {
                     // 调用后端进行注册
@@ -227,8 +232,6 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier, navController: NavControll
             )
         }
 
-        AlertPopup(modifier = Modifier, showPopUp, checkResult, { showPopUp = false }, popUpOk)
-
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier
@@ -244,15 +247,14 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier, navController: NavControll
                     // 后端错误，显示错误信息
                     Log.e("SignUp", "注册失败")
                     checkResult = signUpState.message
-                    showPopUp = true
+                    snackbarViewModel.showErrSnackbar(checkResult)
                 }
 
                 is SignUpUiState.Success -> {
                     // 注册成功，显示成功信息
                     Log.d("SignUp", "注册成功")
                     checkResult = "注册成功"
-                    showPopUp = true
-                    popUpOk = true
+                    snackbarViewModel.showOKSnackbar(checkResult)
 
                     navController.navigate(CoToLScreen.LogIn.name)
                 }
@@ -264,42 +266,6 @@ fun SignUpScreenLayout(modifier: Modifier = Modifier, navController: NavControll
 
         LaunchedEffect(signUpViewModelInLayout.signUpCallCnt) {
             isLoading = false
-        }
-    }
-}
-
-
-@Composable
-fun AlertPopup(
-    modifier: Modifier = Modifier,
-    showPopup: Boolean,
-    checkResult: String,
-    onDismiss: () -> Unit,
-    isOk: Boolean,
-) {
-    if (checkResult == "") return
-    if (showPopup) {
-        // 启动协程在3秒后关闭弹窗
-        LaunchedEffect(Unit) {
-            kotlinx.coroutines.delay(3000)
-            onDismiss()
-        }
-
-        // 弹窗内容
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
-                .border(1.dp, Color.Transparent, RoundedCornerShape(10.dp))
-                .background(if (isOk) Color(0xA0D5E7B5) else Color(0xF0FFCCE1)),
-        ) {
-            Text(
-                text = checkResult,
-                modifier = Modifier.padding(4.dp),
-                color = Color.Black,
-                fontSize = 16.sp
-            )
         }
     }
 }
@@ -327,6 +293,7 @@ fun checkSignUpInputContent(
 fun SignUpScreenPreview() {
     CoToLiveTheme {
         val navController = rememberNavController()
-        SignUpScreenLayout(navController = navController)
+        val snackbarViewModel: SnackbarViewModel = viewModel()
+        SignUpScreenLayout(navController = navController, snackbarViewModel = snackbarViewModel)
     }
 }
