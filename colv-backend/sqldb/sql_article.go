@@ -32,7 +32,10 @@ func (db *MysqlDB) PostArticle(uid uint, title, article_data string) error {
 
 func (db *MysqlDB) GetArticle(uid, article_id uint) (*Article, error) {
 	var articleFromDB Article
-	result := db.DB.Table(articleTableName).Where("article_id = ?", article_id).First(&articleFromDB)
+	result := db.DB.
+		Table(articleTableName).
+		Where("article_id = ?", article_id).
+		First(&articleFromDB)
 	if result.Error != nil {
 		return nil, result.Error
 	}

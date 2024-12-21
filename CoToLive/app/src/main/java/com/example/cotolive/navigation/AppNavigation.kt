@@ -37,7 +37,7 @@ fun AppNavigation(
     LaunchedEffect(snackbarViewModel.showSnackbar) {
         if (snackbarViewModel.showSnackbar) {
             // 显示 Snackbar，并设置自动消失的持续时间
-            snackbarHostState.showSnackbar("修改后的提示信息", duration = SnackbarDuration.Short)
+            snackbarHostState.showSnackbar("", duration = SnackbarDuration.Short)
             // 重置状态为 false，避免重复弹出
             snackbarViewModel.hideSnackbar()
         }

@@ -1,4 +1,4 @@
-package com.example.cotolive.screen
+package com.example.cotolive.viewmodels
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf

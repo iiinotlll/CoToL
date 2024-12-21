@@ -42,6 +42,8 @@ import androidx.navigation.NavController
 import com.example.cotolive.R
 import com.example.cotolive.network.ArticleSent
 import com.example.cotolive.snackBar.SnackbarViewModel
+import com.example.cotolive.viewmodels.ArticleManageUiState
+import com.example.cotolive.viewmodels.ArticleManageViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -41,9 +43,10 @@ import androidx.navigation.compose.rememberNavController
 import com.example.cotolive.R
 import com.example.cotolive.navigation.CoToLScreen
 import com.example.cotolive.network.ArticleAbstract
-import com.example.cotolive.network.ArticleSent
 import com.example.cotolive.snackBar.SnackbarViewModel
 import com.example.cotolive.ui.theme.CoToLiveTheme
+import com.example.cotolive.viewmodels.FetchAbstractUiState
+import com.example.cotolive.viewmodels.FetchAbstractsViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,7 +96,7 @@ fun HomeScreenLayout(modifier: Modifier = Modifier, navController: NavController
                     },
                     title = {
                         Text(
-                            text = "Good Title",
+                            text = "CoToLive",
                             fontSize = 24.sp,
                             fontWeight = FontWeight(800),
                             fontFamily = FontFamily.Monospace
@@ -149,16 +152,16 @@ fun HomeScreenLayout(modifier: Modifier = Modifier, navController: NavController
 }
 
 @Composable
-fun SingleColumnLayout(items: List<ArticleAbstract>, navController: NavController) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        items.forEach { item ->
+fun SingleColumnLayout(articles: List<ArticleAbstract>, navController: NavController) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
+        items(articles) { article -> // 使用 items 来填充列表
             Card(
                 modifier = Modifier
                     .padding(15.dp)
                     .fillMaxWidth()
                     .clickable {
                         // 当点击卡片时执行跳转
-                        navController.navigate(CoToLScreen.Edit.name + "/${item.aid}")
+                        navController.navigate(CoToLScreen.Edit.name + "/${article.aid}")
                     },
                 elevation = CardDefaults.elevatedCardElevation(4.dp)
             ) {
@@ -168,14 +171,15 @@ fun SingleColumnLayout(items: List<ArticleAbstract>, navController: NavControlle
                         .wrapContentHeight() // 高度自适应
                 ) {
                     Column {
-                        Text(text = item.title, fontSize = 20.sp)
-                        Text(text = item.abstract+"...", fontSize = 15.sp)
+                        Text(text = article.title, fontSize = 20.sp)
+                        Text(text = article.abstract + "...", fontSize = 15.sp)
                     }
                 }
             }
         }
     }
 }
+
 
 
 @Preview

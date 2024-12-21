@@ -1,17 +1,13 @@
 package com.example.cotolive.screen
 
 import android.util.Log
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,7 +25,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -43,9 +38,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.cotolive.R
-import com.example.cotolive.navigation.AppNavigation
 import com.example.cotolive.navigation.CoToLScreen
 import com.example.cotolive.snackBar.SnackbarViewModel
+import com.example.cotolive.viewmodels.SignUpUiState
+import com.example.cotolive.viewmodels.SignUpViewModel
 
 
 @Composable
@@ -84,11 +80,11 @@ fun SignUpScreenLayout(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Good Title",
+            text = "注册 CoToLive 账号",
             modifier = Modifier
                 .fillMaxWidth(),
             textAlign = TextAlign.Center,
-            fontSize = 45.sp,
+            fontSize = 30.sp,
             fontFamily = FontFamily.Monospace
         )
 
