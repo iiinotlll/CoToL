@@ -22,7 +22,7 @@ func (db *MysqlDB) UserSignUp(inputName string, inputMail string, inputPwd strin
 	// 查询是否有匹配的记录
 	result := db.DB.Table(userTableName).Select("1").Where("user_mail = ?", inputMail).Limit(1).Find(&exists)
 	if result.RowsAffected > 0 {
-		return fmt.Errorf("existed mail")
+		return fmt.Errorf("邮箱已存在")
 	}
 
 	// 生成 bcrypt 哈希
@@ -54,7 +54,7 @@ func (db *MysqlDB) UserLogin(inputMail string, inputPwd string) (*User, error) {
 
 	// 校验密码
 	if !checkPasswordHash(userFromDB.PwdHash, inputPwd) {
-		return nil, fmt.Errorf("invalid password")
+		return nil, fmt.Errorf("密码错误")
 	}
 
 	return &userFromDB, nil

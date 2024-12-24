@@ -12,7 +12,7 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Query
 
-private const val BASE_URL = "http://10.0.2.2:8088/"
+private const val BASE_URL = "https://342e0955.r19.cpolar.top"
 
 // 拦截器，用于在请求头中添加 Authorization 信息
 class AuthenticationInterceptor : Interceptor {
@@ -75,3 +75,9 @@ object CoToLiveApi {
         retrofit.create(CoToLiveApiService::class.java)
     }
 }
+
+data class ErrorResponse(
+    val status: String,
+    val message: String
+)
+

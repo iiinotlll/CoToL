@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cotolive.network.ArticleAbstract
 import com.example.cotolive.network.CoToLiveApi
+import com.example.cotolive.network.ErrorResponse
+import com.google.gson.Gson
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -42,7 +44,15 @@ class FetchAbstractsViewModel : ViewModel() {
             } catch (e: HttpException) {
                 Log.e("FetchAbstractViewModel", "HTTP error", e)
                 // 这里可以获取到 HTTP 错误的详细信息
-                val errorMessage = e.response()?.errorBody()?.string() ?: "服务器错误，请稍后再试"
+                val errorMessage = try {
+                    val errorBody = e.response()?.errorBody()?.string()
+                    val gson = Gson()
+                    val errorResponse = gson.fromJson(errorBody, ErrorResponse::class.java)
+                    errorResponse?.message ?: "服务器错误，请稍后再试"
+                } catch (ex: Exception) {
+                    // 如果解析失败，使用通用错误信息
+                    "解析错误，请稍后再试"
+                }
                 fetchAbstractUiState = FetchAbstractUiState.Error(errorMessage)
             }
         }

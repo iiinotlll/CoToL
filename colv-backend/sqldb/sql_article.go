@@ -16,7 +16,7 @@ func (db *MysqlDB) PostArticle(uid uint, title, article_data string) error {
 	var exists bool
 	result := db.DB.Table(userTableName).Select("1").Where("user_UID = ?", uid).Limit(1).Find(&exists)
 	if result.RowsAffected == 0 {
-		return fmt.Errorf("uid not found")
+		return fmt.Errorf("未找到 UID")
 	}
 
 	// 向 DB 中写入 article
@@ -40,7 +40,7 @@ func (db *MysqlDB) GetArticle(uid, article_id uint) (*Article, error) {
 		return nil, result.Error
 	}
 	if articleFromDB.BelongsToUID != uid {
-		return nil, fmt.Errorf("wrong belongs to BelongsToUID = %d", articleFromDB.BelongsToUID)
+		return nil, fmt.Errorf("用户无权限")
 	}
 	return &articleFromDB, nil
 }

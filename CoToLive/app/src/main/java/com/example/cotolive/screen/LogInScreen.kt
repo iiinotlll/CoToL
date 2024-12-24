@@ -186,7 +186,7 @@ fun LogInScreenLayout(modifier: Modifier = Modifier, navController: NavControlle
                 is LogInUiState.Error -> {
                     // 后端错误，显示错误信息
                     Log.e("LogIn", "登录失败")
-                    checkResult = "登陆失败"
+                    checkResult = logInUiState.message
                     snackbarViewModel.showErrSnackbar(checkResult)
                 }
                 is LogInUiState.Success -> {

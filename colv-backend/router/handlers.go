@@ -37,7 +37,7 @@ func (dbh *MysqlHandler) HandleUserLogin(c *gin.Context) {
 
 	// bind json
 	if err := c.ShouldBind(&usrLogin); err != nil {
-		c.JSON(400, gin.H{"status": "error", "message": "invalid request"})
+		c.JSON(400, gin.H{"status": "error", "message": "无效请求"})
 		return
 	}
 
@@ -47,7 +47,7 @@ func (dbh *MysqlHandler) HandleUserLogin(c *gin.Context) {
 	} else {
 		token, err := GenerateToken(user.UID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "could not generate token"})
+			c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "无法生成 Token"})
 			return
 		}
 		// 返回 Token
@@ -64,7 +64,7 @@ func (dbh *MysqlHandler) HandleUserSignUp(c *gin.Context) {
 
 	// bind json
 	if err := c.ShouldBind(&usrSignup); err != nil {
-		c.JSON(400, gin.H{"status": "error", "message": "invalid request"})
+		c.JSON(400, gin.H{"status": "error", "message": "无效请求"})
 		return
 	}
 
@@ -84,13 +84,13 @@ func (dbh *MysqlHandler) HandleArticlePost(c *gin.Context) {
 
 	userID, exists := c.Get("UID")
 	if !exists {
-		c.JSON(400, gin.H{"status": "error", "message": "UID not found"})
+		c.JSON(400, gin.H{"status": "error", "message": "未找到 UID"})
 		return
 	}
 
 	// bind json
 	if err := c.ShouldBind(&articlePost); err != nil {
-		c.JSON(400, gin.H{"status": "error", "message": "invalid request"})
+		c.JSON(400, gin.H{"status": "error", "message": "无效请求"})
 		return
 	}
 
@@ -109,13 +109,13 @@ func (dbh *MysqlHandler) HandleArticleRead(c *gin.Context) {
 
 	userID, exists := c.Get("UID")
 	if !exists {
-		c.JSON(400, gin.H{"status": "error", "message": "UID not found"})
+		c.JSON(400, gin.H{"status": "error", "message": "未找到 UID"})
 		return
 	}
 
 	// bind json
 	if err := c.ShouldBind(&articleRead); err != nil {
-		c.JSON(400, gin.H{"status": "error", "message": "invalid request"})
+		c.JSON(400, gin.H{"status": "error", "message": "无效请求"})
 		return
 	}
 
@@ -129,7 +129,7 @@ func (dbh *MysqlHandler) HandleArticleRead(c *gin.Context) {
 func (dbh *MysqlHandler) HandleArticleAbstractRead(c *gin.Context) {
 	userID, exists := c.Get("UID")
 	if !exists {
-		c.JSON(400, gin.H{"status": "error", "message": "UID not found"})
+		c.JSON(400, gin.H{"status": "error", "message": "未找到 UID"})
 		return
 	}
 
@@ -143,7 +143,7 @@ func (dbh *MysqlHandler) HandleArticleAbstractRead(c *gin.Context) {
 func (dbh *MysqlHandler) HandleAriticleModify(c *gin.Context) {
 	userID, exists := c.Get("UID")
 	if !exists {
-		c.JSON(400, gin.H{"status": "error", "message": "UID not found"})
+		c.JSON(400, gin.H{"status": "error", "message": "未找到 UID"})
 		return
 	}
 
@@ -155,7 +155,7 @@ func (dbh *MysqlHandler) HandleAriticleModify(c *gin.Context) {
 
 	// bind json
 	if err := c.ShouldBind(&articleModify); err != nil {
-		c.JSON(400, gin.H{"status": "error", "message": "invalid request"})
+		c.JSON(400, gin.H{"status": "error", "message": "无效请求"})
 		return
 	}
 
@@ -169,7 +169,7 @@ func (dbh *MysqlHandler) HandleAriticleModify(c *gin.Context) {
 func (dbh *MysqlHandler) HandleAriticleDelete(c *gin.Context) {
 	userID, exists := c.Get("UID")
 	if !exists {
-		c.JSON(400, gin.H{"status": "error", "message": "UID not found"})
+		c.JSON(400, gin.H{"status": "error", "message": "未找到 UID"})
 		return
 	}
 
@@ -179,7 +179,7 @@ func (dbh *MysqlHandler) HandleAriticleDelete(c *gin.Context) {
 
 	// bind json
 	if err := c.ShouldBind(&articleDelete); err != nil {
-		c.JSON(400, gin.H{"status": "error", "message": "invalid request"})
+		c.JSON(400, gin.H{"status": "error", "message": "无效请求"})
 		return
 	}
 
